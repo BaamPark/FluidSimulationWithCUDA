@@ -14,10 +14,9 @@ int main() {
     glfwMakeContextCurrent(window);
     glewInit();
 
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glEnable(GL_DEPTH_TEST);  // Optional, helps if particles overlap in 3D
+    glEnable(GL_PROGRAM_POINT_SIZE); // Important for seeing particles
 
-    Shader shader; // Use inline-defined shaders
+    Shader shader; // uses internal shaders
     shader.use();
 
     // Camera setup
@@ -31,23 +30,26 @@ int main() {
     shader.setMat4("view", glm::value_ptr(view));
     shader.setMat4("projection", glm::value_ptr(projection));
 
-    // Simulation setup
+    // Simulation
     SPHSystem system(10, 10, 10, 0.05f);
     ParticleRenderer renderer;
+
+    // Extract initial positions
     std::vector<glm::vec3> positions;
-    for (const auto& p : system.particles) {
+    for (const auto& p : system.particles)
         positions.push_back(p.position);
-    }
     renderer.update(positions);
 
+    // Main loop
     while (!glfwWindowShouldClose(window)) {
         system.computeDensityPressure();
         system.computeForces();
         system.integrate();
-        std::vector<glm::vec3> positions;
-        for (const auto& p : system.particles) {
+
+        // Update renderer with new positions
+        positions.clear();
+        for (const auto& p : system.particles)
             positions.push_back(p.position);
-        }
         renderer.update(positions);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
