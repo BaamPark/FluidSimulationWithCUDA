@@ -90,8 +90,6 @@ void SPHSystem::computeForces() {
 // refer to the slide 27
 // Time Integration (Euler Method) is the process of computing new positions and velocities for the next step
 void SPHSystem::integrate() {
-    //Damping factor used when a particle hits a boundary, to simulate energy loss (like a bounce with friction)
-    const float damping = -0.5f; 
     //Defines the simulation bounding box: all particles must stay within [0, 1] along x, y, and z
     const glm::vec3 boundsMin(0.0f);
     const glm::vec3 boundsMax(1.0f); // You can tweak this
@@ -108,10 +106,10 @@ void SPHSystem::integrate() {
         for (int i = 0; i < 3; ++i) {
             if (p.position[i] < boundsMin[i]) {
                 p.position[i] = boundsMin[i];
-                p.velocity[i] *= damping;
+                p.velocity[i] *= DAMPING;
             } else if (p.position[i] > boundsMax[i]) {
                 p.position[i] = boundsMax[i];
-                p.velocity[i] *= damping;
+                p.velocity[i] *= DAMPING;
             }
         }
     }
