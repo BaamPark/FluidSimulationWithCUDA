@@ -28,6 +28,7 @@ void ParticleRenderer::update(const std::vector<glm::vec3>& positions) {
 
 void ParticleRenderer::render() {
     glBindVertexArray(vao);
+    //GL_POINTS draws 2D square
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(maxParticles));
     glBindVertexArray(0);
 }

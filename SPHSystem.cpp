@@ -1,3 +1,5 @@
+//Ref https://www.cs.cmu.edu/~scoros/cs15467-s16/lectures/11-fluids2.pdf
+
 #include "SPHSystem.h"
 
 SPHSystem::SPHSystem(int numX, int numY, int numZ, float spacing) {
@@ -20,6 +22,7 @@ void SPHSystem::initializeParticles(int numX, int numY, int numZ, float spacing)
     }
 }
 
+//helper function for computeDensityPressure
 float poly6Kernel(float rSquared, float h) {
     const float h2 = h * h;
     if (rSquared >= h2) return 0.0f;
@@ -43,6 +46,7 @@ void SPHSystem::computeDensityPressure() {
 }
 
 
+// helper function used for pressureForce in computeForces function
 glm::vec3 spikyGradient(const glm::vec3& rij, float h) {
     float r = glm::length(rij);
     if (r == 0.0f || r > h) return glm::vec3(0.0f);
@@ -51,6 +55,7 @@ glm::vec3 spikyGradient(const glm::vec3& rij, float h) {
     return static_cast<float>(coeff * pow(h - r, 2)) * (rij / static_cast<float>(r));
 }
 
+// helper function used for viscosity in computeForces function
 float viscosityLaplacian(float r, float h) {
     if (r >= h) return 0.0f;
     float coeff = 45.0f / (M_PI * pow(h, 6));
@@ -82,8 +87,12 @@ void SPHSystem::computeForces() {
     }
 }
 
+// refer to the slide 27
+// Time Integration (Euler Method) is the process of computing new positions and velocities for the next step
 void SPHSystem::integrate() {
-    const float damping = -0.5f;
+    //Damping factor used when a particle hits a boundary, to simulate energy loss (like a bounce with friction)
+    const float damping = -0.5f; 
+    //Defines the simulation bounding box: all particles must stay within [0, 1] along x, y, and z
     const glm::vec3 boundsMin(0.0f);
     const glm::vec3 boundsMax(1.0f); // You can tweak this
 
@@ -91,11 +100,11 @@ void SPHSystem::integrate() {
         // Acceleration
         glm::vec3 acceleration = p.force / p.density;
 
-        // Semi-implicit Euler
-        p.velocity += acceleration * TIME_STEP;
-        p.position += p.velocity * TIME_STEP;
+        //Semi-implicit Euler
+        p.velocity += acceleration * TIME_STEP; // velocity update
+        p.position += p.velocity * TIME_STEP; // position update
 
-        // Simple boundary constraint
+        // Simple boundary constraint that particles stay within a defined simulation box
         for (int i = 0; i < 3; ++i) {
             if (p.position[i] < boundsMin[i]) {
                 p.position[i] = boundsMin[i];

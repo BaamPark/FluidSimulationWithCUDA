@@ -31,7 +31,7 @@ int main() {
     shader.setMat4("projection", glm::value_ptr(projection));
 
     // Simulation
-    SPHSystem system(10, 10, 10, 0.05f);
+    SPHSystem system(10, 10, 10, 0.05f); // 1000 particles with 0.05 spacing
     ParticleRenderer renderer;
 
     // Extract initial positions
