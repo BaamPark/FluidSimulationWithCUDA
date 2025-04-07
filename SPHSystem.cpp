@@ -91,8 +91,8 @@ void SPHSystem::computeForces() {
 // Time Integration (Euler Method) is the process of computing new positions and velocities for the next step
 void SPHSystem::integrate() {
     //Defines the simulation bounding box: all particles must stay within [0, 1] along x, y, and z
-    const glm::vec3 boundsMin(0.0f);
-    const glm::vec3 boundsMax(1.0f); // You can tweak this
+    const glm::vec3 boundsMin(0.0f, 0.0f, 0.0f);
+    const glm::vec3 boundsMax(1.0f, 1.0f, 1.0f);
 
     for (auto& p : particles) {
         // Acceleration
