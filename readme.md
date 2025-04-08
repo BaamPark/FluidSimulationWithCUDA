@@ -13,14 +13,10 @@
 
 ## Lighting options
 - Marching Cubes
-- 
+- Sphere impostor
 
-## Math and Algorithm
+## Blog
 - https://baampark.github.io/posts/2025-04-06_sph/
-
-## Notes
-### 2025-04-06
-- Overshoot problems -> tune time stamp under CFL Condition
 
 
 ## Ref.
