@@ -2,6 +2,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <GL/glew.h>
+#include "SPHParameters.h"
 
 class ParticleRenderer {
 public:

@@ -1,7 +1,7 @@
 #include "ParticleRenderer.h"
 
 ParticleRenderer::ParticleRenderer() {
-    maxParticles = 10000; // adjust if needed
+    maxParticles = numX * numY * numZ;
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);

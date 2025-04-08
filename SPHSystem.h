@@ -7,12 +7,12 @@ class SPHSystem {
 public:
     std::vector<Particle> particles;
 
-    SPHSystem(int numX, int numY, int numZ, float spacing);
+    SPHSystem();
 
     void computeDensityPressure();
     void computeForces();
     void integrate();
 
 private:
-    void initializeParticles(int numX, int numY, int numZ, float spacing);
+    void initializeParticles();
 };

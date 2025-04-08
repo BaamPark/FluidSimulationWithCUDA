@@ -1,5 +1,9 @@
 #pragma once
 
+const int numX = 10;
+const int numY = 10;
+const int numZ = 10;
+const float spacing = 0.05f;
 const float REST_DENSITY = 1000.0f; // kg/m^3
 const float GAS_CONSTANT = 2000.0f; // k
 const float VISCOSITY = 250.0f;
