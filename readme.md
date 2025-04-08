@@ -1,19 +1,26 @@
 ## Milestons
-- Week1: CPU-based SPH implementation with simple shading
-- Week2: Support lighting (phong) using sphere impostors
+- B.P.
+    - CPU-based SPH implementation with simple shading
+    - tune parameters
+    - parallelize computation for density, pressure, forces using CUDA
+- S.P
+    - Make the simulation interactive with user (change camera angle)
+    - Support lighting for particles
 
 ## Terminology
 - Density: the density of a particle is computed based on the mass and distance to neighboring particles within the smoothing radius
 - Pressure: the force exerted per unit area; derived from density 
-- Sphere imposter: 2D quad (a square) that always faces the camera
-- point sprite
+
+## Lighting options
+- Marching Cubes
+- 
 
 ## Math and Algorithm
 - https://baampark.github.io/posts/2025-04-06_sph/
 
 ## Notes
 ### 2025-04-06
-- Endless bouncing problem. Even though collision damping is applied, the bouncing doesn't stop. Tuning damping facto and viscosity doesn't help.
+- Overshoot problems -> tune time stamp under CFL Condition
 
 
 ## Ref.
