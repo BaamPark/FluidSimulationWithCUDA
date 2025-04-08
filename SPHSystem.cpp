@@ -9,38 +9,23 @@ SPHSystem::SPHSystem() {
     initializeParticles();
 }
 
-// void SPHSystem::initializeParticles(int numX, int numY, int numZ, float spacing) {
-//     std::srand(static_cast<unsigned>(std::time(nullptr))); // Optional: seed RNG once
-
-//     float noiseScale = spacing * 0.1f; // 10% of spacing
-
-//     for (int x = 0; x < numX; ++x) {
-//         for (int y = 0; y < numY; ++y) {
-//             for (int z = 0; z < numZ; ++z) {
-//                 float nx = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
-//                 float ny = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
-//                 float nz = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
-
-//                 glm::vec3 pos = glm::vec3(
-//                     x * spacing + nx,
-//                     y * spacing + 0.5f + ny,
-//                     z * spacing + nz
-//                 );
-//                 particles.emplace_back(pos);
-//             }
-//         }
-//     }
-// }
-
-// This will create a grid of particles. For example, calling SPHSystem system(10, 10, 10, 0.05f); creates 1000 particles spaced at 0.05 units apart.
+//create a grid of particles with random noise
 void SPHSystem::initializeParticles() {
+    std::srand(static_cast<unsigned>(std::time(nullptr))); // Optional: seed RNG once
+
+    float noiseScale = spacing * 0.1f; // 10% of spacing
+
     for (int x = 0; x < numX; ++x) {
         for (int y = 0; y < numY; ++y) {
             for (int z = 0; z < numZ; ++z) {
+                float nx = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+                float ny = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+                float nz = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+
                 glm::vec3 pos = glm::vec3(
-                    x * spacing,
-                    y * spacing + 0.5f,
-                    z * spacing
+                    x * spacing + nx,
+                    y * spacing + 0.5f + ny,
+                    z * spacing + nz
                 );
                 particles.emplace_back(pos);
             }
@@ -140,8 +125,3 @@ void SPHSystem::integrate() {
         }
     }
 }
-
-//Simulation Loop
-// system.computeDensityPressure();
-// system.computeForces();
-// system.integrate();
