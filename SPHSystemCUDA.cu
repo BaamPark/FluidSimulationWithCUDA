@@ -1,6 +1,8 @@
 #include "SPHSystemCUDA.cuh"
 #include <cuda_runtime.h>
 #include <stdexcept>
+#include <cstdlib>
+#include <ctime>
 
 // ---------- device‑side math helpers (same formulas as CPU) ------------------
 __device__ float poly6Kernel(float r2, float h) {
@@ -143,11 +145,26 @@ SPHSystemCUDA::~SPHSystemCUDA(){
     cudaFree(d_density_); cudaFree(d_pressure_);
 }
 
-void SPHSystemCUDA::initializeParticles(int nx,int ny,int nz,float h){
-    for(int x=0;x<nx;++x)
-        for(int y=0;y<ny;++y)
-            for(int z=0;z<nz;++z)
-                particles.emplace_back(glm::vec3(x*h,y*h,z*h));
+// Initialize particles in a noisy grid (mirroring CPU version)
+void SPHSystemCUDA::initializeParticles(int nx, int ny, int nz, float h) {
+    // seed RNG to break symmetry
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+    float noiseScale = h * 0.1f;
+    for (int x = 0; x < nx; ++x) {
+        for (int y = 0; y < ny; ++y) {
+            for (int z = 0; z < nz; ++z) {
+                float nx_off = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+                float ny_off = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+                float nz_off = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+                glm::vec3 pos(
+                    x * h + nx_off,
+                    y * h + 0.5f + ny_off,
+                    z * h + nz_off
+                );
+                particles.emplace_back(pos);
+            }
+        }
+    }
 }
 
 // ---------- public API: launch kernels & copy back for renderer -------------

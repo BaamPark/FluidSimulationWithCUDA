@@ -49,7 +49,7 @@ int main() {
     // ---------------------------------------------------------
     // Simulation and renderer
     // ---------------------------------------------------------
-    SPHSim system(10, 10, 10, 0.05f);   // 1 000 particles on the GPU
+    SPHSim system(5, 5, 5, 0.05f);   // 1 000 particles on the GPU
     ParticleRenderer renderer;
 
     std::vector<glm::vec3> positions;
