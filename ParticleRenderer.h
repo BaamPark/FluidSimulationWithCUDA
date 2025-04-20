@@ -15,4 +15,9 @@ public:
 private:
     GLuint vao, vbo;
     size_t maxParticles;
+    GLsizei count;
 };
+
+// Why I added count variable
+// By tracking count = positions.size() in update() and then doing glDrawArrays(GL_POINTS, 0,count), you guarantee that:
+// The GPU only ever tries to draw the number of vertices you actually provided.

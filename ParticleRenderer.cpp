@@ -2,6 +2,7 @@
 
 ParticleRenderer::ParticleRenderer() {
     maxParticles = numX * numY * numZ;
+    count = 0;
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -23,12 +24,17 @@ ParticleRenderer::~ParticleRenderer() {
 
 void ParticleRenderer::update(const std::vector<glm::vec3>& positions) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(glm::vec3), positions.data());
+    // upload exactly the current particle positions (reallocating buffer)
+    glBufferData(GL_ARRAY_BUFFER,
+                 positions.size() * sizeof(glm::vec3),
+                 positions.data(),
+                 GL_DYNAMIC_DRAW);
+    count = static_cast<GLsizei>(positions.size());
 }
 
 void ParticleRenderer::render() {
     glBindVertexArray(vao);
-    //GL_POINTS draws 2D square
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(maxParticles));
+    // draw exactly the number of particles updated
+    glDrawArrays(GL_POINTS, 0, count);
     glBindVertexArray(0);
 }
