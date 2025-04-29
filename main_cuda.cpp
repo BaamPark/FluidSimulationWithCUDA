@@ -1,8 +1,5 @@
-// main_cuda.cpp  – GPU‑only entry point
-// -------------------------------------------------------------
-// Identical to your original main.cpp except that we always use
-// SPHSystemCUDA and drop the CPU/GPU #ifdef switch.
-// -------------------------------------------------------------
+#include <chrono>
+#include <iostream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -13,13 +10,14 @@
 #include "shader.h"
 #include "ParticleRenderer.h"
 
-#include "SPHSystemCUDA.cuh"          // <- CUDA implementation
-using SPHSim = SPHSystemCUDA;        //   alias for brevity
+#include "SPHSystemCUDA.cuh"
+using SPHSim = SPHSystemCUDA;
 
 int main() {
-    // ---------------------------------------------------------
-    // GLFW / OpenGL setup
-    // ---------------------------------------------------------
+    int frameCount = 0;
+    const int maxFrames = 1800;
+    float totalDeltaTime = 0.0f; // Sum of all frame times
+
     glfwInit();
     GLFWwindow* window =
         glfwCreateWindow(800, 600, "SPH Fluid (CUDA)", nullptr, nullptr);
@@ -28,15 +26,12 @@ int main() {
 
     glEnable(GL_PROGRAM_POINT_SIZE);   // show GL_POINTS as squares
 
-    // ---------------------------------------------------------
-    // Shader and camera
-    // ---------------------------------------------------------
     Shader shader;
     shader.use();
 
-    glm::vec3 cameraPos    = glm::vec3(2.0f, 0.5f, 0.5f);
-    glm::vec3 cameraTarget = glm::vec3(0.5f, 0.5f, 0.5f);
-    glm::vec3 up           = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 cameraPos = glm::vec3(2.0f, 1.0f, 0.5f); // Move camera to the +X axis
+    glm::vec3 cameraTarget = glm::vec3(0.5f, 0.5f, 0.5f); // Look toward the center
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); // Keep up vector pointing along Y
 
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, up);
     glm::mat4 proj = glm::perspective(glm::radians(45.0f),
@@ -46,28 +41,22 @@ int main() {
     shader.setMat4("view",       glm::value_ptr(view));
     shader.setMat4("projection", glm::value_ptr(proj));
 
-    // ---------------------------------------------------------
-    // Simulation and renderer
-    // ---------------------------------------------------------
-    SPHSim system;   // 1 000 particles on the GPU
+    SPHSim system;
     ParticleRenderer renderer;
 
     std::vector<glm::vec3> positions;
-    for (const auto& p : system.particles) positions.push_back(p.position);
-    renderer.update(positions);
 
-    // ---------------------------------------------------------
-    // Main loop
-    // ---------------------------------------------------------
-    while (!glfwWindowShouldClose(window)) {
-        // physics (GPU)
+    while (!glfwWindowShouldClose(window) && frameCount < maxFrames) {
+        auto frameStart = std::chrono::high_resolution_clock::now();
+        
         system.computeDensityPressure();
         system.computeForces();
         system.integrate();
 
         // copy positions vector (already filled inside integrate)
         positions.clear();
-        for (const auto& p : system.particles) positions.push_back(p.position);
+        for (const auto& p : system.particles) 
+            positions.push_back(p.position);
         renderer.update(positions);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -76,7 +65,18 @@ int main() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        auto frameEnd = std::chrono::high_resolution_clock::now(); // Frame end time
+        std::chrono::duration<float> deltaTime = frameEnd - frameStart;
+    
+        totalDeltaTime += deltaTime.count(); // Add this frame's time (in seconds)
+        frameCount++;
     }
+
+    float averageDeltaTime = totalDeltaTime / frameCount;
+    std::cout << "Simulation complete.\n";
+    std::cout << "Total time: " << totalDeltaTime << " seconds\n";
+    std::cout << "Average time per frame: " << averageDeltaTime << " seconds\n";
 
     glfwTerminate();
     return 0;

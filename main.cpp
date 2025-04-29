@@ -1,3 +1,6 @@
+#include <chrono>
+#include <iostream>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -9,6 +12,11 @@
 #include "SPHSystem.h"
 
 int main() {
+
+    int frameCount = 0;
+    const int maxFrames = 1800;
+    float totalDeltaTime = 0.0f; // Sum of all frame times
+
     glfwInit();
     GLFWwindow* window = glfwCreateWindow(800, 600, "SPH Fluid", nullptr, nullptr);
     glfwMakeContextCurrent(window);
@@ -25,28 +33,24 @@ int main() {
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); // Keep up vector pointing along Y
 
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, up);
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.01f, 100.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.01f, 100.0f);
 
     shader.setMat4("view", glm::value_ptr(view));
-    shader.setMat4("projection", glm::value_ptr(projection));
+    shader.setMat4("projection", glm::value_ptr(proj));
 
     // Simulation
-    SPHSystem system; // 1000 particles with 0.05 spacing
+    SPHSystem system;
     ParticleRenderer renderer;
 
-    // Extract initial positions
     std::vector<glm::vec3> positions;
-    for (const auto& p : system.particles)
-        positions.push_back(p.position);
-    renderer.update(positions);
 
-    // Main loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window) && frameCount < maxFrames) {
+        auto frameStart = std::chrono::high_resolution_clock::now(); // Frame start time
+        
         system.computeDensityPressure();
         system.computeForces();
         system.integrate();
-
-        // Update renderer with new positions
+    
         positions.clear();
         for (const auto& p : system.particles)
             positions.push_back(p.position);
@@ -55,10 +59,21 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
         renderer.render();
-
+    
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        auto frameEnd = std::chrono::high_resolution_clock::now(); // Frame end time
+        std::chrono::duration<float> deltaTime = frameEnd - frameStart;
+    
+        totalDeltaTime += deltaTime.count(); // Add this frame's time (in seconds)
+        frameCount++;
     }
+
+    float averageDeltaTime = totalDeltaTime / frameCount;
+    std::cout << "Simulation complete.\n";
+    std::cout << "Total time: " << totalDeltaTime << " seconds\n";
+    std::cout << "Average time per frame: " << averageDeltaTime << " seconds\n";
 
     glfwTerminate();
     return 0;
