@@ -9,7 +9,7 @@ class SPHSystemCUDA {
 public:
     std::vector<Particle> particles;               // still used by main.cpp
 
-    SPHSystemCUDA(int nx, int ny, int nz, float spacing);
+    SPHSystemCUDA();
     ~SPHSystemCUDA();
 
     void computeDensityPressure();                 // launch kernels
@@ -18,7 +18,7 @@ public:
 
 private:
     int  N_;                                       // total particles
-    void initializeParticles(int nx,int ny,int nz,float spacing);
+    void initializeParticles();
 
     // device pointers (SoA for coalescing)
     float3 *d_pos_, *d_vel_, *d_force_;

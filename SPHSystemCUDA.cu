@@ -116,9 +116,9 @@ __global__ void integrateKernel(
 }
 
 // ---------- host‑side constructor / destructor ------------------------------
-SPHSystemCUDA::SPHSystemCUDA(int nx,int ny,int nz,float spacing)
+SPHSystemCUDA::SPHSystemCUDA()
 {
-    initializeParticles(nx,ny,nz,spacing);
+    initializeParticles();
     N_ = static_cast<int>(particles.size());
 
     // allocate & copy to device
@@ -146,20 +146,19 @@ SPHSystemCUDA::~SPHSystemCUDA(){
 }
 
 // Initialize particles in a noisy grid (mirroring CPU version)
-void SPHSystemCUDA::initializeParticles(int nx, int ny, int nz, float h) {
-    // seed RNG to break symmetry
+void SPHSystemCUDA::initializeParticles() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
-    float noiseScale = h * 0.1f;
-    for (int x = 0; x < nx; ++x) {
-        for (int y = 0; y < ny; ++y) {
-            for (int z = 0; z < nz; ++z) {
-                float nx_off = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
-                float ny_off = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
-                float nz_off = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+    float noiseScale = spacing * 0.1f;
+    for (int x = 0; x < numX; ++x) {
+        for (int y = 0; y < numY; ++y) {
+            for (int z = 0; z < numZ; ++z) {
+                float nx = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+                float ny = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
+                float nz = ((std::rand() % 1000) / 1000.0f - 0.5f) * noiseScale;
                 glm::vec3 pos(
-                    x * h + nx_off,
-                    y * h + 0.5f + ny_off,
-                    z * h + nz_off
+                    x * spacing + nx,
+                    y * spacing + 0.5f + ny,
+                    z * spacing + nz
                 );
                 particles.emplace_back(pos);
             }
