@@ -4,21 +4,22 @@
 #include <GL/glew.h>
 #include "SPHParameters.h"
 
+// Renderer for SPH particles with water rendering enhancements
 class ParticleRenderer {
 public:
     ParticleRenderer();
     ~ParticleRenderer();
 
-    void update(const std::vector<glm::vec3>& positions);
+    // Update particle positions and per-particle foam factors (called each frame)
+    void update(const std::vector<glm::vec3>& positions, const std::vector<float>& foamFactors);
+
+    // Render particles as water (uses OpenGL point sprites and shader for water effects)
     void render();
 
 private:
-    GLuint vao, vbo;
-    GLuint normalVBO;
+    GLuint vao;
+    GLuint posVBO;
+    GLuint foamVBO;
     size_t maxParticles;
+    size_t count; // number of particles to draw (updated each frame)
 };
-
-
-// Why I added count variable
-// By tracking count = positions.size() in update() and then doing glDrawArrays(GL_POINTS, 0,count), you guarantee that:
-// The GPU only ever tries to draw the number of vertices you actually provided.
