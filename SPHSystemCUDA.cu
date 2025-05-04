@@ -26,11 +26,12 @@ __device__ float3 spikyGradient(float3 rij,float h){
 __global__ void densityPressureKernel(
         int N, const float3* pos, float* dens, float* pres)
 {
-    int i = blockIdx.x*blockDim.x + threadIdx.x;
-    if (i>=N) return;
+    int id = blockIdx.x*blockDim.x + threadIdx.x; //block_id * num_thread_per_block + thread_id
+
+    if (id>=N) return;
 
     float density = 0.f;
-    float3 pi = pos[i];
+    float3 pi = pos[id];
 
     for (int j=0; j<N; ++j) {
         float3 rij{
@@ -40,8 +41,8 @@ __global__ void densityPressureKernel(
         float r2 = rij.x*rij.x + rij.y*rij.y + rij.z*rij.z;
         density += MASS * poly6Kernel(r2, SMOOTHING_RADIUS);
     }
-    dens[i] = density;
-    pres[i] = GAS_CONSTANT * (density - REST_DENSITY);
+    dens[id] = density;
+    pres[id] = GAS_CONSTANT * (density - REST_DENSITY);
 }
 
 __global__ void forceKernel(
@@ -166,8 +167,8 @@ void SPHSystemCUDA::initializeParticles() {
     }
 }
 
-// ---------- public API: launch kernels & copy back for renderer -------------
-inline dim3 gridFor(int N,int block){ return dim3((N+block-1)/block); }
+//helper function designed to calculate the necessary grid dimension depending on #particles N
+inline dim3 gridFor(int N,int block){ return dim3((N+block-1)/block); } //If you used int numTiles = N / tileSize, you’d miss some.
 
 void SPHSystemCUDA::computeDensityPressure(){
     densityPressureKernel<<<gridFor(N_,256),256>>>(N_,d_pos_,d_density_,d_pressure_);

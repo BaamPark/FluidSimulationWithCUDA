@@ -31,13 +31,12 @@ ParticleRenderer::~ParticleRenderer() {
 }
 
 void ParticleRenderer::update(const std::vector<glm::vec3>& positions) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(glm::vec3), positions.data());
+    glBindBuffer(GL_ARRAY_BUFFER, vbo); //binds the VBO
+    glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(glm::vec3), positions.data()); //copy the new positions into GPU
 }
 
 void ParticleRenderer::render() {
     glBindVertexArray(vao);
-    //GL_POINTS draws 2D square
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(maxParticles));
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(maxParticles)); //GL_POINTS draws 2D square
     glBindVertexArray(0);
 }

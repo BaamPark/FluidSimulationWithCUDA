@@ -15,7 +15,7 @@ using SPHSim = SPHSystemCUDA;
 
 int main() {
     int frameCount = 0;
-    const int maxFrames = 1800;
+    const int maxFrames = 1000;
     float totalDeltaTime = 0.0f; // Sum of all frame times
 
     glfwInit();
