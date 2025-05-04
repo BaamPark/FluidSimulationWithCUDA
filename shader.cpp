@@ -59,11 +59,14 @@ Shader::Shader() {
             // Compute the normal vector of the sphere at this fragment (in view space)
             float zComponent = sqrt(1.0 - r2);
             vec3 normalView = vec3(uv.x, uv.y, zComponent);
+
             // Transform normal to world space (ignore translation, use invView rotation)
             vec3 normalWorld = normalize((invView * vec4(normalView, 0.0)).xyz);
+
             // Compute fragment position in world space (approximate as particle center + normal * radius)
             float radius = 0.01; // must match the radius used in vertex shader
             vec3 fragPosWorld = WorldPos + normalWorld * radius;
+
             // Compute view direction and light direction (in world space)
             vec3 viewDir = normalize(viewPos - fragPosWorld);   // from fragment toward camera
             vec3 lightDir = normalize(lightPos - fragPosWorld); // from fragment toward light source
@@ -71,9 +74,11 @@ Shader::Shader() {
             // --- Lighting calculations ---
             // Ambient (small base light)
             vec3 ambient = 0.1 * lightColor * waterColor;
+
             // Diffuse (Lambertian)
             float diff = max(dot(normalWorld, lightDir), 0.0);
             vec3 diffuse = diff * lightColor * waterColor;
+
             // Specular (Blinn-Phong)
             vec3 reflectDir = reflect(-lightDir, normalWorld);
             float specStrength = 0.5;
@@ -85,16 +90,23 @@ Shader::Shader() {
             // Compute reflection and refraction vectors for environment mapping
             vec3 I = normalize(fragPosWorld - viewPos);  // incident view ray (from camera to frag)
             vec3 reflectVec = reflect(I, normalWorld);
+
             // Refractive index of water ~1.33, compute refraction (air->water)
             vec3 refractVec = refract(I, normalWorld, 1.0/1.33);
+
             // Sample the environment cubemap for reflection and refraction colors
-            vec3 reflectColor = texture(skybox, reflectVec).rgb;
-            vec3 refractColor = texture(skybox, refractVec).rgb;
+            // vec3 reflectColor = texture(skybox, reflectVec).rgb;
+            // vec3 refractColor = texture(skybox, refractVec).rgb;
+            vec3 reflectColor = vec3(0.8, 0.9, 1.0);  
+            vec3 refractColor = waterColor * 0.6;    
+
             // Apply water tint to refracted color (simulate absorption)
             refractColor *= waterColor;
+
             // Fresnel factor for reflectance (using Schlick's approximation)
             float cosTheta = max(dot(normalWorld, -I), 0.0);
             float fresnelFactor = 0.02 + (1.0 - 0.02) * pow(1.0 - cosTheta, 5.0);
+
             // Mix reflection and refraction based on Fresnel (angle-dependent)
             vec3 envColor = mix(refractColor, reflectColor, fresnelFactor);
 
@@ -105,6 +117,7 @@ Shader::Shader() {
             // --- Foam effect ---
             // Mix in foam (white) based on foam factor
             finalColor = mix(finalColor, vec3(1.0, 1.0, 1.0), Foam);
+
             // Increase opacity if foam is present (foam makes water more opaque)
             float baseAlpha = 0.6;
             float alpha = mix(baseAlpha, 1.0, Foam);
