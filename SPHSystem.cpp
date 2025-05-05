@@ -33,6 +33,10 @@ void SPHSystem::initializeParticles() {
     }
 }
 
+SPHSystem::~SPHSystem() {
+    //SPHSystem object is destroyed, the particles vector automatically destroyed
+}
+
 //helper function for computeDensityPressure
 float poly6Kernel(float rSquared, float h) {
     const float h2 = h * h;

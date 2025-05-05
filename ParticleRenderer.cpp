@@ -40,6 +40,7 @@ ParticleRenderer::~ParticleRenderer() {
     glDeleteVertexArrays(1, &vao);
 }
 
+
 void ParticleRenderer::update(const std::vector<glm::vec3>& positions, const std::vector<float>& foamFactors) {
     count = positions.size();
     // Update positions VBO with new particle positions
@@ -48,11 +49,19 @@ void ParticleRenderer::update(const std::vector<glm::vec3>& positions, const std
     // Update foam VBO with new per-particle foam values
     glBindBuffer(GL_ARRAY_BUFFER, foamVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, count * sizeof(float), foamFactors.data());
-}
+
+// void ParticleRenderer::update(const std::vector<glm::vec3>& positions) {
+//     glBindBuffer(GL_ARRAY_BUFFER, vbo); //binds the VBO
+//     glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(glm::vec3), positions.data()); //copy the new positions into GPU
+// >>>>>>> 369e3b3f0326d095cd818ca481b5db805ed433a0
+// }
 
 void ParticleRenderer::render() {
     // Draw all particles as points (each point expanded into a sphere in the shader)
     glBindVertexArray(vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
+
+//     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(maxParticles)); //GL_POINTS draws 2D square
+// >>>>>>> 369e3b3f0326d095cd818ca481b5db805ed433a0
     glBindVertexArray(0);
 }

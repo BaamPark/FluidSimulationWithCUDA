@@ -38,4 +38,23 @@ g++ main.cpp ParticleRenderer.cpp SPHSystem.cpp shader.cpp -o fluid_sim -lGL -lG
 nvcc -arch=sm_86 -std=c++17 \
      Shader.cpp ParticleRenderer.cpp main_cuda.cpp SPHSystemCUDA.cu \
      -lglfw -lGLEW -lGL -o fluid_sim_cuda
+
+
+nvcc -arch=sm_86 -std=c++17 \
+     Shader.cpp ParticleRenderer.cpp main_cuda.cpp SPHSytemSharedCUDA.cu \
+     -lglfw -lGLEW -lGL -o fluid_sim_shared_cuda
 ```
+
+Device name: NVIDIA GeForce RTX 4060 Ti
+Shared memory per block: 49152 bytes
+Max threads per block: 1024
+
+
+(base) beomseok@Beomseok:/mnt/c/Users/qkr4q/OneDrive/Desktop/Graphics/FluidSimulationWithCUDA$ ./fluid_sim_cuda
+Simulation complete.
+Total time: 8.6255 seconds
+Average time per frame: 0.00479195 seconds
+(base) beomseok@Beomseok:/mnt/c/Users/qkr4q/OneDrive/Desktop/Graphics/FluidSimulationWithCUDA$ ./fluid_sim_shared_cuda
+Simulation complete.
+Total time: 8.35284 seconds
+Average time per frame: 0.00464046 seconds

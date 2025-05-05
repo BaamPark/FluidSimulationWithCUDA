@@ -8,6 +8,7 @@ public:
     std::vector<Particle> particles;
 
     SPHSystem();
+    ~SPHSystem();
 
     void computeDensityPressure();
     void computeForces();
