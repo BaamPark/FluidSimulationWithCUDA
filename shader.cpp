@@ -1,6 +1,49 @@
 #include "shader.h"
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
+#include <fstream>
+#include <iterator>
+
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <GL/glew.h>            // or your GL loader
+#include "shader.h"
+
+// ─── File loader ──────────────────────────────────────────────
+static std::string loadFileToString(const std::string& path) {
+    std::ifstream in(path, std::ios::in | std::ios::binary);
+    if (!in) {
+        std::cerr << "ERROR: could not open file '" << path << "'\n";
+        return "";
+    }
+    std::ostringstream ss;
+    ss << in.rdbuf();
+    return ss.str();
+}
+
+// ─── Shader compile/link error checker ───────────────────────
+static void checkCompileErrors(GLuint handle, const std::string& type) {
+    GLint success;
+    GLchar infoLog[1024];
+    if (type == "PROGRAM") {
+        glGetProgramiv(handle, GL_LINK_STATUS, &success);
+        if (!success) {
+            glGetProgramInfoLog(handle, 1024, nullptr, infoLog);
+            std::cerr << "PROGRAM_LINK_ERROR:\n" << infoLog << "\n";
+        }
+    } else {
+        glGetShaderiv(handle, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            glGetShaderInfoLog(handle, 1024, nullptr, infoLog);
+            std::cerr << type << "_COMPILE_ERROR:\n" << infoLog << "\n";
+        }
+    }
+}
+// ───────────────────────────────────────────────────────────────
+
+
+
 
 Shader::Shader() {
     // Vertex shader source: outputs world position and foam factor, sets point size for sphere radius
@@ -117,6 +160,9 @@ Shader::Shader() {
         }
     )";
 
+
+
+
     // Compile vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -157,6 +203,38 @@ Shader::Shader() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 }
+
+// New constructor, ~line 30
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
+    // 1. retrieve the source from file
+    std::string vertSource = loadFileToString(vertexPath);
+    std::string fragSource = loadFileToString(fragmentPath);
+    const char* vS = vertSource.c_str();
+    const char* fS = fragSource.c_str();
+
+    // 2. compile & link exactly as your existing code does
+    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vS, nullptr);
+    glCompileShader(vertex);
+    checkCompileErrors(vertex, "VERTEX");
+
+    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fS, nullptr);
+    glCompileShader(fragment);
+    checkCompileErrors(fragment, "FRAGMENT");
+
+    ID = glCreateProgram();
+    glAttachShader(ID, vertex);
+    glAttachShader(ID, fragment);
+    glLinkProgram(ID);
+    checkCompileErrors(ID, "PROGRAM");
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+}
+
+
+
 
 void Shader::use() {
     glUseProgram(ID);

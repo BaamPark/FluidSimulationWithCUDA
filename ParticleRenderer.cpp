@@ -1,9 +1,12 @@
 #include "ParticleRenderer.h"
 #include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
 
 ParticleRenderer::ParticleRenderer() {
     // Determine maximum particles (from simulation parameters)
     maxParticles = numX * numY * numZ;
+
+
 
     // Generate Vertex Array Object and Vertex Buffer Objects for positions and foam
     glGenVertexArrays(1, &vao);
@@ -30,6 +33,47 @@ ParticleRenderer::ParticleRenderer() {
     // Unbind VAO
     glBindVertexArray(0);
 
+
+        // around line 80 in init():
+    float cubeVerts[] = {
+        // positions
+        0.0f, 0.0f, 0.0f,  // 0
+        1.0f, 0.0f, 0.0f,  // 1
+        1.0f, 1.0f, 0.0f,  // 2
+        0.0f, 1.0f, 0.0f,  // 3
+        0.0f, 0.0f, 1.0f,  // 4
+        1.0f, 0.0f, 1.0f,  // 5
+        1.0f, 1.0f, 1.0f,  // 6
+        0.0f, 1.0f, 1.0f   // 7
+    };
+    unsigned int cubeIdx[] = {
+        // bottom
+        0,1, 1,2, 2,3, 3,0,
+        // top
+        4,5, 5,6, 6,7, 7,4,
+        // vertical
+        0,4, 1,5, 2,6, 3,7
+    };
+
+    glGenVertexArrays(1, &containerVAO);
+    glGenBuffers(1, &containerVBO);
+    glGenBuffers(1, &containerEBO);
+
+    glBindVertexArray(containerVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, containerVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, containerEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIdx), cubeIdx, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glBindVertexArray(0);
+
+
+
+
+
     count = 0;
 }
 
@@ -40,7 +84,6 @@ ParticleRenderer::~ParticleRenderer() {
     glDeleteVertexArrays(1, &vao);
 }
 
-
 void ParticleRenderer::update(const std::vector<glm::vec3>& positions, const std::vector<float>& foamFactors) {
     count = positions.size();
     // Update positions VBO with new particle positions
@@ -49,19 +92,20 @@ void ParticleRenderer::update(const std::vector<glm::vec3>& positions, const std
     // Update foam VBO with new per-particle foam values
     glBindBuffer(GL_ARRAY_BUFFER, foamVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, count * sizeof(float), foamFactors.data());
-
-// void ParticleRenderer::update(const std::vector<glm::vec3>& positions) {
-//     glBindBuffer(GL_ARRAY_BUFFER, vbo); //binds the VBO
-//     glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(glm::vec3), positions.data()); //copy the new positions into GPU
-// >>>>>>> 369e3b3f0326d095cd818ca481b5db805ed433a0
-// }
+}
 
 void ParticleRenderer::render() {
     // Draw all particles as points (each point expanded into a sphere in the shader)
     glBindVertexArray(vao);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(count));
-
-//     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(maxParticles)); //GL_POINTS draws 2D square
-// >>>>>>> 369e3b3f0326d095cd818ca481b5db805ed433a0
     glBindVertexArray(0);
+
+
+
+    
+
+
 }
+
+
+

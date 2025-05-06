@@ -16,6 +16,7 @@
 #include <string>
 #include <iostream>
 #include <GL/glew.h>
+#include "ContainerRenderer.h"
 
 GLuint loadCubemap(std::vector<std::string> faces) {
     GLuint textureID;
@@ -44,6 +45,7 @@ GLuint loadCubemap(std::vector<std::string> faces) {
 }
 
 
+
 int main() {
     // Initialize GLFW and create window
     glfwInit();
@@ -67,6 +69,11 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_FALSE); // Disable depth writes for transparent blending of water particles
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+
 
     // Create shader program (with built-in source for water simulation)
     Shader shader;
@@ -151,6 +158,10 @@ int main() {
     }
     renderer.update(positions, foamFactors);
 
+    ContainerRenderer container;
+        container.init();
+
+
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
         // Step the fluid simulation (CPU)
@@ -200,12 +211,24 @@ int main() {
         renderer.update(sortedPositions, sortedFoam);
 
         // Clear the frame (color and depth buffers)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // black background (environment seen via cubemap)
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f); // black background (environment seen via cubemap)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
+        // now draw container
+        glDepthMask(GL_TRUE);         // make sure we write to depth
+        glDisable(GL_BLEND);          // turn off blending for a solid color
+        container.setColor(glm::vec3(0.8f, 0.2f, 0.2f));  // e.g. red
+        container.render(view, projection);
+        // restore state for next frame (if you draw more transparent stuff later)
+        glEnable(GL_BLEND);
+        glDepthMask(GL_FALSE);
 
         // Render water particles
         shader.use();
         renderer.render();
+
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
