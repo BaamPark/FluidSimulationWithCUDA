@@ -25,11 +25,17 @@
 - https://www.youtube.com/watch?v=rSKMYc1CQHE
 - https://www.cs.cmu.edu/~scoros/cs15467-s16/lectures/11-fluids2.pdf
 - https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
-- https://www.fbxiang.com/blog/2019/05/01/smoothed-particle-hydrodynamics.html
+- https://www.fbxiang.com/blog/2019/05/01/smoothed-particle-hydrodynamics.html`
 
 ```bash
 g++ main.cpp ParticleRenderer.cpp SPHSystem.cpp shader.cpp -o fluid_sim -lGL -lGLEW -lglfw
 ```
+
+```bash
+# Render particle
+g++ main_light.cpp ParticleRenderer.cpp SPHSystem.cpp shader.cpp ContainerRenderer.cpp -o fluid_sim -lGL -lGLEW -lglfw
+```
+
 
 ```bash
 # Build the GPU-accelerated version with CUDA (requires NVIDIA GPU & CUDA Toolkit)
