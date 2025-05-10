@@ -9,7 +9,7 @@ SPHSystem::SPHSystem() {
     initializeParticles();
 }
 
-//create a grid of particles with random noise
+//create a grid of particles with random noise. Noise is needed to break perfect symmetry
 void SPHSystem::initializeParticles() {
     std::srand(static_cast<unsigned>(std::time(nullptr))); // Optional: seed RNG once
 
@@ -102,7 +102,7 @@ void SPHSystem::computeForces() {
     }
 }
 
-// refer to the slide 27
+
 // Time Integration (Euler Method) is the process of computing new positions and velocities for the next step
 void SPHSystem::integrate() {
     //Defines the simulation bounding box: all particles must stay within [0, 1] along x, y, and z

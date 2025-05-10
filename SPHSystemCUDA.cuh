@@ -20,7 +20,9 @@ private:
     int  N_;                                       // total particles
     void initializeParticles();
 
-    // device pointers (SoA for coalescing)
+    // In global kernel, we cannot access particle directly 
+    // because CUDA only supports low-level C++ objects like float or float3. 
+    // So we need containers for particle.position
     float3 *d_pos_, *d_vel_, *d_force_;
     float  *d_density_, *d_pressure_;
 };

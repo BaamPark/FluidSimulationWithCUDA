@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 
-// ---------- device‑side math helpers (same formulas as CPU) ------------------
+// __device__ functions are used as callees from __global__ kernels
 __device__ float poly6Kernel(float r2, float h) {
     float h2 = h*h;
     if (r2 >= h2) return 0.f;
@@ -22,7 +22,7 @@ __device__ float3 spikyGradient(float3 rij,float h){
     return make_float3(coeff*rij.x, coeff*rij.y, coeff*rij.z);
 }
 
-// ---------- kernels ----------------------------------------------------------
+// ---------- global kernels ---------
 __global__ void densityPressureKernel(
         int N, const float3* pos, float* dens, float* pres)
 {
@@ -116,7 +116,6 @@ __global__ void integrateKernel(
     pos[i]=p; vel[i]=v;
 }
 
-// ---------- host‑side constructor / destructor ------------------------------
 SPHSystemCUDA::SPHSystemCUDA()
 {
     initializeParticles();
@@ -170,6 +169,7 @@ void SPHSystemCUDA::initializeParticles() {
 //helper function designed to calculate the necessary grid dimension depending on #particles N
 inline dim3 gridFor(int N,int block){ return dim3((N+block-1)/block); } //If you used int numTiles = N / tileSize, you’d miss some.
 
+// *d_pos_, *d_vel_, *d_force_, *d_density_, *d_pressure_ are defined in SPHSystemCUDA.cuh
 void SPHSystemCUDA::computeDensityPressure(){
     densityPressureKernel<<<gridFor(N_,256),256>>>(N_,d_pos_,d_density_,d_pressure_);
     cudaDeviceSynchronize();
