@@ -1,8 +1,8 @@
 #pragma once
 
-const int numX = 5;
-const int numY = 5;
-const int numZ = 5;
+const int numX = 15;
+const int numY = 15;
+const int numZ = 15;
 const float spacing = 0.01f;
 const float REST_DENSITY = 1000.0f; // ↑ Higher rest density → stronger pressure response to compression
 const float GAS_CONSTANT = 200.0f; // ↑ Higher → more aggressive pressure forces → jittery, unstable fluid if too high

@@ -1,6 +1,6 @@
 // conclusion: the shared memory approach doesn't make improvement compared to global memory approach. It could be flawed code or the nature of SPH.
 
-#include "SPHSystemCUDA.cuh"
+#include "SPHSystemSharedCUDA.cuh"
 #include <cuda_runtime.h>
 #include <stdexcept>
 #include <cstdlib>
@@ -294,7 +294,7 @@ __global__ void integrateKernel(
 }
 
 // ---------- host‑side constructor / destructor ------------------------------
-SPHSystemCUDA::SPHSystemCUDA()
+SPHSystemSharedCUDA::SPHSystemSharedCUDA()
 {
     initializeParticles();
     N_ = static_cast<int>(particles.size());
@@ -318,13 +318,13 @@ SPHSystemCUDA::SPHSystemCUDA()
     cudaMemcpy(d_vel_, h_vel.data(), v3, cudaMemcpyHostToDevice);
 }
 
-SPHSystemCUDA::~SPHSystemCUDA(){
+SPHSystemSharedCUDA::~SPHSystemSharedCUDA(){
     cudaFree(d_pos_); cudaFree(d_vel_); cudaFree(d_force_);
     cudaFree(d_density_); cudaFree(d_pressure_);
 }
 
 // Initialize particles in a noisy grid (mirroring CPU version)
-void SPHSystemCUDA::initializeParticles() {
+void SPHSystemSharedCUDA::initializeParticles() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     float noiseScale = spacing * 0.1f;
     for (int x = 0; x < numX; ++x) {
@@ -347,17 +347,17 @@ void SPHSystemCUDA::initializeParticles() {
 //helper function designed to calculate the necessary grid dimension (gridDim)
 inline dim3 gridFor(int N,int block){ return dim3((N+block-1)/block); }
 
-void SPHSystemCUDA::computeDensityPressure(){
+void SPHSystemSharedCUDA::computeDensityPressure(){
     densityPressureKernel_shared<<<gridFor(N_,256),256>>>(N_,d_pos_,d_density_,d_pressure_);
     cudaDeviceSynchronize();
 }
 
-void SPHSystemCUDA::computeForces(){
+void SPHSystemSharedCUDA::computeForces(){
     forceKernel<<<gridFor(N_,256),256>>>(N_,d_pos_,d_vel_,d_density_,d_pressure_,d_force_);
     cudaDeviceSynchronize();
 }
 
-void SPHSystemCUDA::integrate(){
+void SPHSystemSharedCUDA::integrate(){
     integrateKernel<<<gridFor(N_,256),256>>>(N_,d_pos_,d_vel_,d_force_,d_density_);
     cudaDeviceSynchronize();
 

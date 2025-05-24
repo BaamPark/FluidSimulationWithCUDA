@@ -30,9 +30,9 @@ nvcc -arch=sm_86 -std=c++17 \
      -lglfw -lGLEW -lGL -o fluid_sim_cuda
 
 
-# nvcc -arch=sm_86 -std=c++17 \
-#      Shader.cpp ParticleRenderer.cpp main_cuda.cpp SPHSytemSharedCUDA.cu \
-#      -lglfw -lGLEW -lGL -o fluid_sim_shared_cuda
+nvcc -arch=sm_86 -std=c++17 \
+     Shader.cpp ParticleRenderer.cpp main_shared_cuda.cpp SPHSystemSharedCUDA.cu \
+     -lglfw -lGLEW -lGL -o fluid_sim_shared_cuda
 ```
 
 ## Note:
